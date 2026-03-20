@@ -17,12 +17,12 @@ interface DNAData {
   activities?: { content: string; metadata: any }[]
 }
 
-const RAMP = ['#7c3aed','#6d28d9','#8b5cf6','#a78bfa','#5b21b6','#4c1d95']
+const RAMP = ['#7c3aed', '#6d28d9', '#8b5cf6', '#a78bfa', '#5b21b6', '#4c1d95']
 
 export default function DNAPage() {
   const [data, setData] = useState<DNAData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeSection, setActiveSection] = useState<'overview'|'mistakes'|'behaviour'|'timeline'|'history'>('overview')
+  const [activeSection, setActiveSection] = useState<'overview' | 'mistakes' | 'behaviour' | 'timeline' | 'history'>('overview')
 
   useEffect(() => {
     fetch('/api/dna')
@@ -59,11 +59,11 @@ export default function DNAPage() {
   const mistakePatterns = parseMistakePatterns(data?.recentMistakes ?? [])
 
   const SECTIONS = [
-    { id: 'overview',   label: 'Overview',   icon: '🧬' },
-    { id: 'mistakes',   label: 'Mistakes',   icon: '⚠️' },
-    { id: 'behaviour',  label: 'Behaviour',  icon: '🎯' },
-    { id: 'timeline',   label: 'Timeline',   icon: '📈' },
-    { id: 'history',    label: 'History',    icon: '📜' },
+    { id: 'overview', label: 'Overview', icon: '🧬' },
+    { id: 'mistakes', label: 'Mistakes', icon: '⚠️' },
+    { id: 'behaviour', label: 'Behaviour', icon: '🎯' },
+    { id: 'timeline', label: 'Timeline', icon: '📈' },
+    { id: 'history', label: 'History', icon: '📜' },
   ] as const
 
   return (
@@ -124,11 +124,10 @@ export default function DNAPage() {
           <button
             key={s.id}
             onClick={() => setActiveSection(s.id)}
-            className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1.5 ${
-              activeSection === s.id
+            className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1.5 ${activeSection === s.id
                 ? 'bg-violet-600 text-white'
                 : 'text-slate-400 hover:text-slate-200'
-            }`}
+              }`}
           >
             <span>{s.icon}</span>
             {s.label}
@@ -158,23 +157,35 @@ export default function DNAPage() {
             </div>
 
             {/* AI DNA Summary */}
-            <div className="card">
-              <div className="flex items-center gap-2 mb-3">
-                <span>🧬</span>
-                <h2 className="font-semibold text-slate-200">AI Analysis</h2>
-                <span className="text-xs bg-violet-900/30 text-violet-400 px-2 py-0.5 rounded-full">
-                  Hindsight reflect
-                </span>
+            <div className="card bg-gradient-to-br from-[#1a1a2e] to-[#16213e] border-[#7c3aed]/20">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-violet-900/30 flex items-center justify-center text-lg">🧬</div>
+                  <div>
+                    <h2 className="font-semibold text-slate-100">Personalised Learning DNA</h2>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">Hindsight AI Reflection</p>
+                  </div>
+                </div>
+                <div className="px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full text-xs text-violet-400 font-medium">
+                  Mentorship Mode
+                </div>
               </div>
-              {data?.dnaSummary ? (
-                <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
-                  {data.dnaSummary}
+
+              <div className="mb-4 p-3 bg-violet-900/10 border-l-4 border-violet-500 rounded-r-lg">
+                <p className="text-xs text-slate-400 italic">
+                  "Your Learning DNA is a unique signature of how you process information, where you excel, and where you struggle. Below is a mentor-style reflection based on your recent activity."
                 </p>
+              </div>
+
+              {data?.dnaSummary ? (
+                <div className="text-sm text-slate-300 leading-relaxed space-y-3 whitespace-pre-line bg-[#0f0f1a]/50 p-4 rounded-xl border border-[#1e3a5f]/30">
+                  {data.dnaSummary}
+                </div>
               ) : (
-                <div className="text-sm text-slate-500">
-                  <p>No analysis yet. Complete a few quizzes first.</p>
-                  <Link href="/quiz" className="text-violet-400 hover:text-violet-300 mt-2 inline-block text-sm">
-                    Take a quiz →
+                <div className="text-sm text-slate-500 bg-[#0f0f1a]/50 p-6 rounded-xl border border-dashed border-[#1e3a5f]/50 text-center">
+                  <p>Your Learning DNA is still evolving! Complete a few more quizzes and coding challenges so I can reflect on your patterns.</p>
+                  <Link href="/quiz" className="text-violet-400 hover:text-violet-300 mt-3 inline-block font-medium">
+                    Start your next session →
                   </Link>
                 </div>
               )}
@@ -241,12 +252,12 @@ export default function DNAPage() {
           {/* Pattern breakdown */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { label: 'Concept Gaps',    count: mistakePatterns.concept,    color: 'red',    icon: '🧠', desc: 'Wrong understanding of concepts' },
-              { label: 'Edge Cases',      count: mistakePatterns.edgeCase,   color: 'amber',  icon: '⚡', desc: 'Missed boundary conditions' },
-              { label: 'Logic Errors',    count: mistakePatterns.logic,      color: 'orange', icon: '🔀', desc: 'Incorrect reasoning chain' },
-              { label: 'Time Pressure',   count: mistakePatterns.time,       color: 'blue',   icon: '⏱️', desc: 'Ran out of time' },
-              { label: 'Silly Mistakes',  count: mistakePatterns.silly,      color: 'purple', icon: '🤦', desc: 'Careless errors' },
-              { label: 'Code Mistakes',   count: mistakePatterns.code,       color: 'cyan',   icon: '💻', desc: 'Programming errors' },
+              { label: 'Concept Gaps', count: mistakePatterns.concept, color: 'red', icon: '🧠', desc: 'Wrong understanding of concepts' },
+              { label: 'Edge Cases', count: mistakePatterns.edgeCase, color: 'amber', icon: '⚡', desc: 'Missed boundary conditions' },
+              { label: 'Logic Errors', count: mistakePatterns.logic, color: 'orange', icon: '🔀', desc: 'Incorrect reasoning chain' },
+              { label: 'Time Pressure', count: mistakePatterns.time, color: 'blue', icon: '⏱️', desc: 'Ran out of time' },
+              { label: 'Silly Mistakes', count: mistakePatterns.silly, color: 'purple', icon: '🤦', desc: 'Careless errors' },
+              { label: 'Code Mistakes', count: mistakePatterns.code, color: 'cyan', icon: '💻', desc: 'Programming errors' },
             ].map((p) => (
               <div key={p.label} className="card">
                 <div className="flex items-center gap-2 mb-2">
@@ -320,21 +331,19 @@ export default function DNAPage() {
                     tip: 'Read questions twice before answering. Slow down.',
                   },
                 ].map((b, i) => (
-                  <div key={i} className={`rounded-xl p-4 border ${
-                    b.detected
+                  <div key={i} className={`rounded-xl p-4 border ${b.detected
                       ? 'bg-red-900/20 border-red-800/40'
                       : 'bg-emerald-900/10 border-emerald-800/20'
-                  }`}>
+                    }`}>
                     <div className="flex items-center gap-2 mb-1">
                       <span>{b.detected ? '🚩' : '✅'}</span>
                       <span className={`text-sm font-medium ${b.detected ? 'text-red-300' : 'text-emerald-300'}`}>
                         {b.flag}
                       </span>
-                      <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${
-                        b.detected
+                      <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${b.detected
                           ? 'bg-red-900/50 text-red-400'
                           : 'bg-emerald-900/50 text-emerald-400'
-                      }`}>
+                        }`}>
                         {b.detected ? 'Detected' : 'Clear'}
                       </span>
                     </div>
@@ -449,10 +458,9 @@ export default function DNAPage() {
                       <tr key={i} className="border-b border-[#1e3a5f]/30 hover:bg-[#1a1a2e] transition-colors">
                         <td className="py-2.5 text-slate-300">{q.topic}</td>
                         <td className="py-2.5">
-                          <span className={`font-medium ${
-                            q.score >= 80 ? 'text-emerald-400' :
-                            q.score >= 50 ? 'text-yellow-400' : 'text-red-400'
-                          }`}>{q.score}%</span>
+                          <span className={`font-medium ${q.score >= 80 ? 'text-emerald-400' :
+                              q.score >= 50 ? 'text-yellow-400' : 'text-red-400'
+                            }`}>{q.score}%</span>
                         </td>
                         <td className="py-2.5 text-slate-400">{q.total}</td>
                         <td className="py-2.5 text-slate-500 text-xs">
@@ -483,7 +491,7 @@ export default function DNAPage() {
                   const content = item.content.toLowerCase()
                   const isMistake = content.includes('mistake') || content.includes('error') || content.includes('failed')
                   const isQuiz = content.includes('quiz') || content.includes('session') || content.includes('completed')
-                  
+
                   let type = isQuiz ? 'Quiz' : (isMistake ? 'Arena' : 'Activity')
                   let score = ''
                   let topic = ''
@@ -511,9 +519,8 @@ export default function DNAPage() {
                   return (
                     <div key={i} className="bg-[#1a1a2e] border border-[#1e3a5f]/50 rounded-xl p-4 flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
-                          type === 'Quiz' ? 'bg-violet-900/30 text-violet-400' : 'bg-cyan-900/30 text-cyan-400'
-                        }`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${type === 'Quiz' ? 'bg-violet-900/30 text-violet-400' : 'bg-cyan-900/30 text-cyan-400'
+                          }`}>
                           {type === 'Quiz' ? '📝' : '⚔️'}
                         </div>
                         <div>
@@ -522,9 +529,8 @@ export default function DNAPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className={`${
-                          score === 'Failed' || score === 'Mistake' ? 'text-red-400' : 'text-violet-400'
-                        } font-bold text-lg`}>
+                        <div className={`${score === 'Failed' || score === 'Mistake' ? 'text-red-400' : 'text-violet-400'
+                          } font-bold text-lg`}>
                           {score}
                         </div>
                         <div className="text-xs text-slate-500">Recorded in Hindsight</div>
@@ -559,12 +565,12 @@ function calcDNAScore(data: DNAData | null): number {
 function parseMistakePatterns(mistakes: string[]) {
   const text = mistakes.join(' ').toLowerCase()
   return {
-    concept:  (text.match(/concept|wrong|incorrect|understand/g) ?? []).length,
+    concept: (text.match(/concept|wrong|incorrect|understand/g) ?? []).length,
     edgeCase: (text.match(/edge|boundary|empty|null|zero/g) ?? []).length,
-    logic:    (text.match(/logic|reason|approach|algorithm/g) ?? []).length,
-    time:     (text.match(/time|slow|timeout|fast/g) ?? []).length,
-    silly:    (text.match(/silly|careless|typo|obvious/g) ?? []).length,
-    code:     (text.match(/code|syntax|error|bug|compile/g) ?? []).length,
+    logic: (text.match(/logic|reason|approach|algorithm/g) ?? []).length,
+    time: (text.match(/time|slow|timeout|fast/g) ?? []).length,
+    silly: (text.match(/silly|careless|typo|obvious/g) ?? []).length,
+    code: (text.match(/code|syntax|error|bug|compile/g) ?? []).length,
   }
 }
 

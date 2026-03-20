@@ -130,6 +130,6 @@ export async function logStudySession(
 export async function getUserDNASummary(userId: string): Promise<string> {
   return reflectOnMemories(
     userId,
-    "Summarize this student's weak topics, recurring mistake patterns, coding errors, and behaviour. Be specific and structured."
+    "Provide a warm, encouraging, and clear summary of this student's learning journey. Highlight their strengths, specify exactly which topics need more focus, and identify recurring mistake patterns. Give actionable, friendly advice on how to improve. Avoid sounding like a machine; be a supportive mentor. Use clear paragraphs."
   )
 }
