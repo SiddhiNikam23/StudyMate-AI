@@ -14,6 +14,7 @@ interface DNAData {
   streak: number
   topicAverages: { topic: string; avg: number }[]
   quizHistory: { topic: string; score: number; total: number; timestamp: number }[]
+  activities?: { content: string; metadata: any }[]
 }
 
 const RAMP = ['#7c3aed','#6d28d9','#8b5cf6','#a78bfa','#5b21b6','#4c1d95']
@@ -21,7 +22,7 @@ const RAMP = ['#7c3aed','#6d28d9','#8b5cf6','#a78bfa','#5b21b6','#4c1d95']
 export default function DNAPage() {
   const [data, setData] = useState<DNAData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeSection, setActiveSection] = useState<'overview'|'mistakes'|'behaviour'|'timeline'>('overview')
+  const [activeSection, setActiveSection] = useState<'overview'|'mistakes'|'behaviour'|'timeline'|'history'>('overview')
 
   useEffect(() => {
     fetch('/api/dna')
@@ -62,6 +63,7 @@ export default function DNAPage() {
     { id: 'mistakes',   label: 'Mistakes',   icon: '⚠️' },
     { id: 'behaviour',  label: 'Behaviour',  icon: '🎯' },
     { id: 'timeline',   label: 'Timeline',   icon: '📈' },
+    { id: 'history',    label: 'History',    icon: '📜' },
   ] as const
 
   return (
@@ -415,8 +417,8 @@ export default function DNAPage() {
                     contentStyle={{ background: '#16213e', border: '1px solid #1e3a5f', borderRadius: 8 }}
                     labelStyle={{ color: '#f1f5f9' }}
                     itemStyle={{ color: '#a78bfa' }}
-                    formatter={(v: number, _: string, props: { payload?: { topic?: string } }) => [
-                      `${v}%`, props.payload?.topic ?? 'Score'
+                    formatter={(v: any, name: any, props: { payload?: { topic?: string } }) => [
+                      `${v}%`, props.payload?.topic ?? name ?? 'Score'
                     ]}
                   />
                   <Line type="monotone" dataKey="score"
@@ -464,6 +466,79 @@ export default function DNAPage() {
             ) : (
               <p className="text-slate-500 text-sm">No quiz history yet.</p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* HISTORY */}
+      {activeSection === 'history' && (
+        <div className="space-y-6">
+          <div className="card">
+            <h2 className="font-semibold text-slate-200 mb-4 flex items-center gap-2">
+              <span>📜</span> Learning Activity History
+            </h2>
+            <div className="space-y-3">
+              {data?.activities && data.activities.length > 0 ? (
+                data.activities.map((item, i) => {
+                  const content = item.content.toLowerCase()
+                  const isMistake = content.includes('mistake') || content.includes('error') || content.includes('failed')
+                  const isQuiz = content.includes('quiz') || content.includes('session') || content.includes('completed')
+                  
+                  let type = isQuiz ? 'Quiz' : (isMistake ? 'Arena' : 'Activity')
+                  let score = ''
+                  let topic = ''
+                  let date = item.metadata.timestamp ? new Date(parseInt(item.metadata.timestamp)).toLocaleDateString() : 'Recent'
+
+                  // Try to extract topic
+                  const topicMatch = item.content.match(/(?:completed|for|topic:|learned|about)\s+([^.]+?)(?:\s+quiz|\s+mistake|\s+session|\s+task|$)/i)
+                  topic = item.metadata.problemTitle || item.metadata.topic || (topicMatch ? topicMatch[1] : 'Learning Item')
+
+                  // Clean up topic (remove "the ")
+                  if (topic.toLowerCase().startsWith('the ')) topic = topic.slice(4)
+
+                  // Try to extract score
+                  const scoreMatch = item.content.match(/score:\s*(\d+(?:\/\d+)?%?)/i)
+                  if (item.metadata.score) {
+                    score = `${item.metadata.score}%`
+                  } else if (scoreMatch) {
+                    score = scoreMatch[1]
+                  } else if (isMistake) {
+                    score = content.includes('code') ? 'Failed' : 'Mistake'
+                  } else if (isQuiz) {
+                    score = 'Completed'
+                  }
+
+                  return (
+                    <div key={i} className="bg-[#1a1a2e] border border-[#1e3a5f]/50 rounded-xl p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
+                          type === 'Quiz' ? 'bg-violet-900/30 text-violet-400' : 'bg-cyan-900/30 text-cyan-400'
+                        }`}>
+                          {type === 'Quiz' ? '📝' : '⚔️'}
+                        </div>
+                        <div>
+                          <h3 className="text-slate-200 font-medium text-sm">{type}: {topic}</h3>
+                          <p className="text-slate-500 text-xs">{date}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`${
+                          score === 'Failed' || score === 'Mistake' ? 'text-red-400' : 'text-violet-400'
+                        } font-bold text-lg`}>
+                          {score}
+                        </div>
+                        <div className="text-xs text-slate-500">Recorded in Hindsight</div>
+                      </div>
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="text-center py-10 text-slate-500">
+                  <p>No authentic hindsight data available yet.</p>
+                  <p className="text-xs mt-1">Activities will appear here as you learn.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

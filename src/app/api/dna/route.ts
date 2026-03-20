@@ -15,18 +15,25 @@ export async function GET(req: NextRequest) {
     // Try Hindsight — gracefully skip if unavailable
     let dnaSummary = ''
     let recentMistakes: string[] = []
+    let activities: any[] = []
 
     try {
       const { getUserDNASummary, recallMemories } = await import('@/lib/hindsight')
-      const [summary, memories] = await Promise.all([
+      const [summary, mists, acts] = await Promise.all([
         getUserDNASummary(userId),
         recallMemories(userId, 'recent mistakes and errors', 10),
+        recallMemories(userId, 'recent study sessions and coding results', 10),
       ])
       dnaSummary = summary
-      recentMistakes = memories
+      recentMistakes = mists
         .map((m) => (m as { content?: string; text?: string }).content
           ?? (m as { content?: string; text?: string }).text ?? '')
         .filter(Boolean)
+      
+      activities = acts.map(m => ({
+        content: (m as any).content || (m as any).text || '',
+        metadata: (m as any).metadata || {}
+      }))
     } catch {
       console.warn('Hindsight unavailable — returning Redis data only')
       dnaSummary = quizHistory.length > 0
@@ -53,6 +60,7 @@ export async function GET(req: NextRequest) {
       streak,
       topicAverages,
       quizHistory,
+      activities,
     })
   } catch (err) {
     console.error('DNA fetch error:', err)
